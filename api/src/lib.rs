@@ -1,14 +1,33 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use serde::Deserialize;
+use std::error::Error;
+
+const BASE_URL: &str = "https://hacker-news.firebaseio.com/v0";
+
+#[derive(Deserialize, Debug)]
+pub struct Story {
+    pub by: String,
+    pub descendants: u32,
+    pub kids: Vec<u32>,
+    pub score: u32,
+    pub time: u32,
+    pub title: String,
+    pub r#type: String,
+    pub url: String,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub fn get_story(id: usize) -> Result<Story, Box<dyn Error>> {
+    let url = format!("{}/item/{}.json", BASE_URL, id);
+    let response = reqwest::blocking::get(&url)?;
+    let story: Story = response.json()?;
+    Ok(story)
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn get_topstories() -> Result<Vec<Story>, Box<dyn Error>> {
+    let url = format!("{}/topstories.json", BASE_URL);
+    let ids = reqwest::blocking::get(url)?.json::<Vec<usize>>()?;
+    let stories = ids
+        .into_iter()
+        .map(|id| get_story(id))
+        .collect::<Result<Vec<Story>, Box<dyn Error>>>()?;
+    Ok(stories)
 }
