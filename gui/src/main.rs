@@ -1,4 +1,5 @@
 use eframe::epaint::Vec2;
+use hacker_news_api::get_topstories;
 use hacker_news_gui::hacker_news::HackerNews;
 
 fn main() {
@@ -15,4 +16,5 @@ fn main() {
         win_option,
         Box::new(|cc| Box::new(hacker_news.init(cc))),
     );
+    get_topstories().unwrap();
 }

@@ -24,9 +24,10 @@ pub fn get_story(id: usize) -> Result<Story, Box<dyn Error>> {
 
 pub fn get_topstories() -> Result<Vec<Story>, Box<dyn Error>> {
     let url = format!("{}/topstories.json", BASE_URL);
-    let ids = reqwest::blocking::get(url)?.json::<Vec<usize>>()?;
+    let ids: Vec<usize> = reqwest::blocking::get(url)?.json()?;
     let stories = ids
         .into_iter()
+        .take(5)
         .map(|id| get_story(id))
         .collect::<Result<Vec<Story>, Box<dyn Error>>>()?;
     Ok(stories)
